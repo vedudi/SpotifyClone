@@ -4,8 +4,10 @@ import React from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
+  const navigation=useNavigation()
   return (
     <LinearGradient colors={['#040306', '#131624']} style={{flex: 1}}>
       <SafeAreaView>
@@ -21,7 +23,7 @@ const LoginScreen = () => {
           Millions of Songs Free on Spotify !
         </Text>
         <View style={{height: 80}} />
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity style={styles.loginButton} onPress={()=>navigation.navigate("Main")}>
           <Text> Sign İn With Spotify </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.phoneButton}>
