@@ -13,10 +13,13 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 const SongInfoScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const {album} = route.params || {};
+  const {coverArt, name, artist, year} = album;
   return (
     <LinearGradient colors={['#040306', '#131624']} style={{flex: 1}}>
       <ScrollView style={styles.scrollView}>
@@ -26,23 +29,21 @@ const SongInfoScreen = () => {
           </TouchableOpacity>
           <View style={styles.imageView}>
             <Image
-              source={
-                {
-                  // uri: coverArt
-                }
-              }
+              source={{
+                uri: coverArt,
+              }}
               style={styles.coverImage}
             />
           </View>
         </View>
         <Text style={styles.albumNameText}>
-          {/* {name} */}
+          {name}
           {/*  */}
         </Text>
 
         <View style={styles.artistView}>
           <Text style={styles.artistText}>
-            {/* {artist} */}
+            {artist}
             {/*  */}
           </Text>
         </View>
@@ -67,19 +68,16 @@ const SongInfoScreen = () => {
           <View style={styles.infoView}>
             <View style={styles.infoContainer}>
               <Text style={styles.infoText}>
-                Album
-                {/* {name} */}
+                {name}
                 {/*  */}
               </Text>
 
               <Text style={styles.infoText}>
-                Artist
-                {/* {artist} */}
+                {artist}
                 {/*  */}
               </Text>
               <Text style={styles.infoText}>
-                Year:
-                {/* {year} */}
+                {year}
                 {/*  */}
               </Text>
             </View>

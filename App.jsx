@@ -1,11 +1,17 @@
-import { StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import React from 'react';
 import Navigation from './src/navigation/Routes';
+import {AlbumsProvider} from './src/context/AlbumsContext';
+import {ArtistsProvider} from './src/context/ArtistContext';
 
 const App = () => {
   return (
     <>
-      <Navigation />
+      <ArtistsProvider>
+        <AlbumsProvider>
+          <Navigation />
+        </AlbumsProvider>
+      </ArtistsProvider>
     </>
   );
 };

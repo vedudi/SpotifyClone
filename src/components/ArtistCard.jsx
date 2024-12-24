@@ -6,15 +6,13 @@ const ArtistCard = ({artist}) => {
     <TouchableOpacity>
       <View style={styles.artistContainer}>
         <Image
-          source={
-            {
-              // uri: artist.data.visuals.avatarImage.sources[0].url
-            }
-          }
+          source={{
+            uri: artist.data.visuals.avatarImage.sources[0].url,
+          }}
           style={styles.artistImage}
         />
         <Text numberOfLines={1} style={styles.artistName}>
-          {/* {artist.data.profile.name} */}
+          {artist.data.profile.name}
         </Text>
       </View>
     </TouchableOpacity>

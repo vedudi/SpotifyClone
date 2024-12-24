@@ -72,9 +72,9 @@ const Routes = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Main" component={BottomTabs} />
-        <Stack.Screen name="Info" component={SongInfoScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Info" component={SongInfoScreen} />
+        <Stack.Screen name="Main" component={BottomTabs} />
         <Stack.Screen name="Liked" component={LikedSongScreen} />
       </Stack.Navigator>
     </NavigationContainer>
@@ -83,6 +83,4 @@ const Routes = () => {
 
 export default Routes;
 
-const styles = StyleSheet.create({
-  
-});
+const styles = StyleSheet.create({});

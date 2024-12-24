@@ -236,9 +236,11 @@ const LikedSongScreen = () => {
 
           <View style={{padding: 10, marginTop: 20}}>
             <Image
-              source={{
-                // uri: selectedTrack?.images.coverart,
-              }}
+              source={
+                {
+                  // uri: selectedTrack?.images.coverart,
+                }
+              }
               style={{width: '100%', height: 330, borderRadius: 4}}
             />
             <View

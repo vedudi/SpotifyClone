@@ -1,10 +1,10 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 
-const Error = () => {
+const Error = ({albumsError}) => {
   return (
     <View>
-      <Text>Error</Text>
+      <Text>{albumsError.message}</Text>
     </View>
   );
 };
