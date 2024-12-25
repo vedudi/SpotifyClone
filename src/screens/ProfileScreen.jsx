@@ -8,8 +8,21 @@ import {
 } from 'react-native';
 import React, {useContext} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+import {ProfileContext} from '../context/ProfileContext';
+import round from 'lodash/round';
 
 const ProfileScreen = () => {
+  const {profileData, loading, error} = useContext(ProfileContext);
+  const {name, image_url, followers_count, public_playlists} = profileData;
+
+  const formatFollowers = count => {
+    if (count >= 1000000) {
+      return `${round(count / 1000000, 1)}M`;
+    }
+    if (count >= 1000) {
+      return `${round(count / 1000, 1)}K`;
+    }
+  };
   return (
     <LinearGradient colors={['#040306', '#131624']} style={{flex: 1}}>
       <ScrollView
@@ -17,27 +30,25 @@ const ProfileScreen = () => {
         contentContainerStyle={{paddingBottom: 100}}>
         <View style={{padding: 12}}>
           <View style={styles.profileContainer}>
-            <Image source={{
-              // uri: image_url
-              
-            }} style={styles.profileImage} />
+            <Image
+              source={{
+                uri: image_url,
+              }}
+              style={styles.profileImage}
+            />
             <View>
-              <Text style={styles.profileName}>
-                {/* {name} */}
-                
-              </Text>
+              <Text style={styles.profileName}>{name}</Text>
               <Text style={styles.profileFollowers}>
-                {/* {formatFollowers(followers_count)}  */}
-                followers
+                {formatFollowers(followers_count)} followers
               </Text>
             </View>
           </View>
         </View>
         <Text style={styles.sectionTitle}>Your Playlists</Text>
         <View style={styles.playlistContainer}>
-          {/* {public_playlists.map(playlist => ( */}
+          {public_playlists.map(playlist => (
             <View
-              // key={playlist.uri}
+              key={playlist.uri}
               style={{
                 marginVertical: 10,
                 flexDirection: 'row',
@@ -46,24 +57,18 @@ const ProfileScreen = () => {
               }}>
               <Image
                 source={{
-                  uri: 'https://picsum.photos/200/300'
-                  
+                  uri: 'https://picsum.photos/200/300',
                 }}
                 style={styles.playlistImage}
               />
               <View>
-                <Text style={styles.playlistName}>
-                  {/* {playlist.name} */}
-                  
-                </Text>
+                <Text style={styles.playlistName}>{playlist.name}</Text>
                 <Text style={styles.playlistFollowers}>
-                  
-                  {/* {formatFollowers(playlist.followers_count)} */}
-                   followers
+                  {formatFollowers(playlist.followers_count)} followers
                 </Text>
               </View>
             </View>
-           {/* ))} */}
+          ))}
         </View>
       </ScrollView>
     </LinearGradient>

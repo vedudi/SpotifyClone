@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -20,6 +20,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useNavigation} from '@react-navigation/native';
 import SongItem from '../components/SongItem';
+import axios from 'axios';
 
 const LikedSongScreen = () => {
   const navigation = useNavigation();
@@ -29,6 +30,36 @@ const LikedSongScreen = () => {
   const [loading, setLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    const options = {
+      method: 'GET',
+      url: 'https://shazam.p.rapidapi.com/search',
+      params: {
+        term: searchText,
+        locale: 'tr-TR',
+        offset: '0',
+        limit: '5',
+      },
+      headers: {
+        'x-rapidapi-key': 'a3840fce78mshc1e0b03983a458ep13015djsnf64a867a9d2b',
+        'x-rapidapi-host': 'shazam.p.rapidapi.com',
+      },
+    };
+
+    try {
+      const response = await axios.request(options);
+      setSearchTracks(response.data.tracks.hits);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    handleSearch();
+  }, []);
   return (
     <>
       <LinearGradient colors={['#614385', '#516395']} style={{flex: 1}}>
@@ -69,6 +100,8 @@ const LikedSongScreen = () => {
                       width: '85%',
                       color: 'white',
                     }}
+                    onChangeText={setSearchText}
+                    onSubmitEditing={{handleSearch}}
                     placeholder="Find in Liked songs"
                   />
                   <AntDesign name="search1" size={25} color="white" />
@@ -83,7 +116,7 @@ const LikedSongScreen = () => {
               </Text>
               <Text style={{fontSize: 13, color: 'white', marginTop: 5}}>
                 {' '}
-                430 Songs
+                {searchedTracks.length} Songs
               </Text>
             </View>
             <Pressable
@@ -137,15 +170,15 @@ const LikedSongScreen = () => {
                 data={searchedTracks}
                 // keyExtractor={item => item.track.key}
                 style={{marginTop: 10}}
-                renderItem={() => (
+                renderItem={({item}) => (
                   <Pressable
                   // onPress={() => handlePlay(item)}
                   >
                     <View style={styles.trackContainer}>
                       {/* <Image
-                      source={{uri: item.track.images.coverart}}
-                      style={styles.albumCover}
-                    /> */}
+                        source={{uri: item.track.images.coverart}}
+                        style={styles.albumCover}
+                      /> */}
                       <View style={styles.trackInfo}>
                         <Text style={styles.trackName}>
                           {/* {item.track.title} */}
