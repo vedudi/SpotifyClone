@@ -2,8 +2,6 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Modal,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -21,9 +19,12 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import {useNavigation} from '@react-navigation/native';
 import SongItem from '../components/SongItem';
 import axios from 'axios';
+import Modal from 'react-native-modal';
+import TrackPlayer, {useProgress} from 'react-native-track-player';
 
 const LikedSongScreen = () => {
   const navigation = useNavigation();
+  const progress = useProgress();
   const [searchedTracks, setSearchTracks] = useState([1]);
   const [searchText, setSearchText] = useState('Türkiye de Popüler Müzikler');
   const [selectedTrack, setSelectedTrack] = useState(null);
@@ -57,9 +58,65 @@ const LikedSongScreen = () => {
       setLoading(false);
     }
   };
+  const setupPlayer = async () => {
+    try {
+      await TrackPlayer.setupPlayer();
+      TrackPlayer.updateOptions({
+        capabilities: [
+          TrackPlayer.CAPABILITY_PLAY,
+          TrackPlayer.CAPABILITY_PAUSE,
+          TrackPlayer.CAPABILITY_STOP,
+          TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+          TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+          TrackPlayer.CAPABILITY_SEEK_TO,
+        ],
+      });
+    } catch (error) {}
+  };
+
+  const handlePlay = async track => {
+    const trackData = {
+      id: track.track.key,
+      url: track.track.hub.actions.find(action => action.type === 'uri').uri,
+      title: track.track.title,
+      artist: track.track.subtitle,
+      artwork: track.track.images.coverart,
+    };
+    try {
+      await TrackPlayer.reset();
+      await TrackPlayer.add(trackData);
+      await TrackPlayer.play();
+      setSelectedTrack(track.track);
+      setModalVisible(true);
+      setIsPlaying(true);
+    } catch (error) {}
+  };
+
   useEffect(() => {
     handleSearch();
+    setupPlayer();
   }, []);
+  const formatTime = seconds => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+  const togglePlayback = async () => {
+    if (isPlaying) {
+      await TrackPlayer.pause();
+    } else {
+      await TrackPlayer.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+  const seekForward = async () => {
+    const position = await TrackPlayer.getPosition();
+    await TrackPlayer.seekTo(position + 10);
+  };
+  const seekBackward = async () => {
+    const position = await TrackPlayer.getPosition();
+    await TrackPlayer.seekTo(position - 10);
+  };
   return (
     <>
       <LinearGradient colors={['#614385', '#516395']} style={{flex: 1}}>
@@ -70,7 +127,9 @@ const LikedSongScreen = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-            <TouchableOpacity style={{marginHorizontal: 10}}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{marginHorizontal: 10}}>
               <Ionicons name="arrow-back" size={25} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
@@ -100,7 +159,7 @@ const LikedSongScreen = () => {
                     color: 'white',
                   }}
                   onChangeText={setSearchText}
-                  onSubmitEditing={{handleSearch}}
+                  onSubmitEditing={handleSearch}
                   placeholder="Find in Liked songs"
                 />
                 <AntDesign name="search1" size={25} color="white" />
@@ -118,7 +177,7 @@ const LikedSongScreen = () => {
               {searchedTracks.length} Songs
             </Text>
           </View>
-          <Pressable
+          <TouchableOpacity
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -161,7 +220,7 @@ const LikedSongScreen = () => {
                 <Entypo name="controller-play" size={30} color="white" />
               </TouchableOpacity>
             </View>
-          </Pressable>
+          </TouchableOpacity>
           {loading ? (
             <ActivityIndicator size={'large'} color={'gray'} />
           ) : (
@@ -170,9 +229,7 @@ const LikedSongScreen = () => {
               keyExtractor={item => item?.track?.key}
               style={{marginTop: 10}}
               renderItem={({item}) => (
-                <Pressable
-                // onPress={() => handlePlay(item)}
-                >
+                <TouchableOpacity onPress={() => handlePlay(item)}>
                   <View style={styles.trackContainer}>
                     <Image
                       source={{uri: item?.track?.images?.coverart}}
@@ -190,52 +247,12 @@ const LikedSongScreen = () => {
                     </View>
                     <Entypo name="controller-play" size={24} color="white" />
                   </View>
-                </Pressable>
+                </TouchableOpacity>
               )}
             />
           )}
         </SafeAreaView>
       </LinearGradient>
-      {/* <TouchableOpacity
-        onPress={() => setModalVisible(!modalVisible)}
-        style={{
-          backgroundColor: '#5072a7',
-          padding: 10,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          position: 'absolute',
-          left: 20,
-          bottom: 10,
-          borderRadius: 10,
-          marginBottom: 15,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 10,
-        }}>
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-          <Image source={{
-
-          }} style={{width: 40, height: 40}} />
-          <Text
-            style={{
-              fontSize: 13,
-              width: 220,
-              color: 'white',
-              fontWeight: 'bold',
-            }}>
-            name
-          </Text>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-            <TouchableOpacity>
-              <AntDesign name="heart" size={25} color="#1DB954" />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <AntDesign name="pausecircleo" size={25} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableOpacity> */}
       <Modal
         isVisible={modalVisible}
         onBackdropPress={() => setModalVisible(false)}
@@ -295,17 +312,18 @@ const LikedSongScreen = () => {
                   width: '100%',
                   marginTop: 10,
                   height: 3,
-                  backgroundColor: 'gray',
+                  backgroundColor: 'white',
                   borderRadius: 5,
                 }}>
                 <View
                   style={[
                     styles.progressbar,
-                    // {
-                    //   width: `${
-                    //     (progress.position / progress.duration) * 100
-                    //   }%`,
-                    // },
+                    {
+                      width: `${
+                        (1 - progress.position / progress.duration) * 100
+                      }%`,
+                      transform: [{scaleX: -1}],
+                    },
                   ]}
                 />
                 <View
@@ -316,7 +334,7 @@ const LikedSongScreen = () => {
                     height: 10,
                     backgroundColor: 'white',
                     borderRadius: 5,
-                    // left: `${(progress.position / progress.duration) * 100}%`,
+                    right: `${(progress.position / progress.duration) * 100}%`,
                   }}
                 />
               </View>
@@ -329,10 +347,10 @@ const LikedSongScreen = () => {
                   alignItems: 'center',
                 }}>
                 <Text style={{color: 'white', fontSize: 15}}>
-                  {/* {formatTime(progress.position)} */}
+                  {formatTime(progress.duration)}
                 </Text>
                 <Text style={{color: 'white', fontSize: 15}}>
-                  {/* {formatTime(progress.duration)} */}
+                  {formatTime(progress.position)}
                 </Text>
               </View>
 
@@ -343,39 +361,33 @@ const LikedSongScreen = () => {
                   marginTop: 17,
                   alignItems: 'center',
                 }}>
-                <Pressable
-                // onPress={seekBackward}
-                >
+                <TouchableOpacity onPress={seekForward}>
                   <Entypo
                     name="controller-fast-backward"
                     size={30}
                     color="white"
                   />
-                </Pressable>
-                <Pressable>
+                </TouchableOpacity>
+                <TouchableOpacity>
                   <Ionicons name="play-skip-back" size={30} color={'white'} />
-                </Pressable>
-                <Pressable
-                // onPress={togglePlayback}
-                >
+                </TouchableOpacity>
+                <TouchableOpacity onPress={togglePlayback}>
                   {isPlaying ? (
                     <AntDesign name="pausecircle" size={60} color="white" />
                   ) : (
                     <Entypo name="controller-play" size={60} color="white" />
                   )}
-                </Pressable>
-                <Pressable>
+                </TouchableOpacity>
+                <TouchableOpacity>
                   <Ionicons name="play-skip-forward" size={30} color="white" />
-                </Pressable>
-                <Pressable
-                // onPress={seekForward}
-                >
+                </TouchableOpacity>
+                <TouchableOpacity onPress={seekBackward}>
                   <Entypo
                     name="controller-fast-forward"
                     size={30}
                     color="white"
                   />
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -390,7 +402,7 @@ export default LikedSongScreen;
 const styles = StyleSheet.create({
   progressbar: {
     height: '100%',
-    backgroundColor: 'white',
+    backgroundColor: 'gray',
   },
   trackContainer: {
     padding: 10,
